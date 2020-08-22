@@ -1,18 +1,30 @@
 import unittest
-from gameClasses import card, deck, player, game
+from witches import witches
 import numpy as np
 
 class gameLogic(unittest.TestCase):
 
     def test_randomPlay(self):
-        test_game     = game({"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "seed": 22})
+        test_game     = witches({"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": 22, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {15: "J", 11: "°11°"}})
         test_game.reset()
-        print("after reset")
 
-        #print Hand of RL player:
-        for i in [3, 12, 7, 13, 10, 3, 1, 0]:
-            rewards, corr_moves, done = test_game.step(i, print_=True)
-            print(i, rewards)
+        print(test_game.getState().flatten().astype(np.int).shape)
+
+        test_game.printHands()
+
+        #shift cards:
+        for i in [1, 3, 9, 0, 5, 12, 10, 2]:
+            rewards, corr_move, done = test_game.play_ai_move(i, print_=True)
+
+        print("\n")
+        tricks = [[47, 49, 48, 46],[53,54,57,58]]
+        for i in tricks:
+            for j in i:
+                rewards, corr_move, done = test_game.play_ai_move(j, print_=True)
+
+        # print("Start playing\n")
+        # for i in [1, 2]:
+        #     rewards, corr_moves, done = test_game.step(i, print_=True)
 
         # test_game.reset()
         # print(test_game.players[1].hand)
@@ -20,7 +32,7 @@ class gameLogic(unittest.TestCase):
         # for i in [3, 12, 8, 2, 15, 13]:
         #     rewards, corr_moves, done = test_game.stepRandomPlay(i, print_=True)
         # print(rewards, corr_moves, done)
-        #
+
         # test_game.reset()
         # print(test_game.players[1].hand)
         # test_game.playUntilAI(print_=True)

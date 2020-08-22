@@ -1,7 +1,7 @@
 import gym
 from gym import spaces
 
-from .gameClasses import card, deck, player, game # Point is important to use gameClasses from this folder!
+from .witches import witches # Point is important to use gameClasses from this folder!
 import numpy as np
 
 class WitchesEnvMulti(gym.Env):
@@ -9,20 +9,20 @@ class WitchesEnvMulti(gym.Env):
         # Create the train game:
         # Lowest 10 cards, if nu_shift_cards=0 no cards are shifted.
         #Max cards in witches is 15
-        options   = {"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "seed": None}
-        self.my_game       = game(options)
+        options       = {"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": None, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {15: "J", 11: "°11°"}}
+        self.my_game  = witches(options)
         self.correct_moves = 0
 
         ### Create the test game (only one RL)
-        self.options_test   = {"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RANDOM", "RL", "RANDOM", "RANDOM"], "nu_shift_cards": 2, "nu_cards": 15, "seed": None}
-        self.test_game     = game(self.options_test)
+        self.options_test   = {"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RANDOM", "RL", "RANDOM", "RANDOM"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": None, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {15: "J", 11: "°11°"}}
+        self.test_game     = witches(self.options_test)
 
         states          = self.my_game.getState().flatten().astype(np.int).shape
         actions         = self.my_game.nu_players * self.my_game.nu_cards
         self.action_space      = gym.spaces.Discrete(actions)
         self.observation_space = gym.spaces.Discrete(states[0])
 
-        # Reward style:
+        # Reward style for train game:
         self.style = "final" # "final"
         self.printON = False
 
