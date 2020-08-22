@@ -1,7 +1,7 @@
 import gym
-from gym import spaces
+from   gym import spaces
 
-from .witches import witches # Point is important to use gameClasses from this folder!
+from  .witches import witches # Point is important to use gameClasses from this folder!
 import numpy as np
 
 class WitchesEnvMulti(gym.Env):
@@ -34,8 +34,12 @@ class WitchesEnvMulti(gym.Env):
 
     def step(self, action):
         '''
-        used in train game
-        returns reward according to style
+        @action is the unique index of this card (e.g. from 0 to 59)
+        @returns
+        - state vector
+        - reward according to style
+        - done
+        - info
         '''
         assert self.action_space.contains(action)
         rewards, round_finished, done = self.my_game.play_ai_move(action, print_=self.printON)

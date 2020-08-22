@@ -13,7 +13,11 @@ if __name__ == '__main__':
     state_dim  = env.observation_space.n
     action_dim = env.action_space.n
 
-    for i in range(steps):
-        player =  env.my_game.active_player
-        action = policy.act(state, batches[player])# <- state is appended to memory in act function
-        state, rewards, done, _ = env.step(action)
+    print("Model state  dimension:", state_dim, "\nModel action dimension:", action_dim)
+
+    env.printON = True
+
+    for card_idx in [1]:
+         player =  env.my_game.active_player
+         state, rewards, done, info = env.step(card_idx)
+         print("\n", state, rewards, done, info)

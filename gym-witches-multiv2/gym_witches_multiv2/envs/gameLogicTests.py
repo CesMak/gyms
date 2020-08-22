@@ -4,13 +4,17 @@ import numpy as np
 
 class gameLogic(unittest.TestCase):
 
-    def test_randomPlay(self):
-        test_game     = witches({"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": 22, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {15: "J", 11: "°11°"}})
+    def initGame(self, seed=None):
+        test_game     = witches({"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": seed, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {15: "J", 11: "°11°"}})
         test_game.reset()
 
         print(test_game.getState().flatten().astype(np.int).shape)
 
         test_game.printHands()
+        return test_game
+
+    def test_randomPlay(self):
+        test_game = self.initGame(seed=22)
 
         #shift cards:
         for i in [1, 3, 9, 0, 5, 12, 10, 2]:
@@ -21,6 +25,15 @@ class gameLogic(unittest.TestCase):
         for i in tricks:
             for j in i:
                 rewards, corr_move, done = test_game.play_ai_move(j, print_=True)
+
+    def test_getBinaryOptions(self):
+        test_game = self.initGame(seed=22)
+
+        #shift cards:
+        for i in [1, 3, 9, 0, 5, 12, 10, 2]:
+            rewards, corr_move, done = test_game.play_ai_move(i, print_=False)
+
+        print("TODO test vector here if correct! BGRY and 0....15 or is it sorted by index?!")
 
         # print("Start playing\n")
         # for i in [1, 2]:

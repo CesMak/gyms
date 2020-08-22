@@ -1,4 +1,9 @@
-from .gameClasses import game
+# quick fix to work in gameLogicTests and for environment tests
+try:
+    from .gameClasses import game
+except:
+    from gameClasses import game
+
 import numpy as np
 
 class witches(game):
@@ -11,6 +16,7 @@ class witches(game):
         self.shifting_phase    = True
         self.shift_option      = 2 # due to gym reset=2 ["left", "right", "opposide"]
         self.correct_moves     = 0 # is not used or?!
+        super().setup_game()       # is required here already for gym to work!
 
     def reset(self):
         self.nu_games_played +=1
@@ -38,12 +44,11 @@ class witches(game):
     def play_ai_move(self, ai_card_idx, print_=False):
         'card idx from 0....'
         current_player    =  self.active_player
-        valid_opt_hand    = self.getValidOptions(current_player)# hand index
+        card_options__    = self.getValidOptions(current_player)# cards
         card              = self.idx2Card(ai_card_idx)
         player_has_card   = self.players[current_player].hasSpecificCardOnHand(ai_card_idx)
         tmp               = card.idx
-        card_options      = [self.players[current_player].hand[i].idx for i in valid_opt_hand]
-        card_options__    = [self.players[current_player].hand[i] for i in valid_opt_hand]
+        card_options      = self.cards2Idx(card_options__)
         if player_has_card and tmp in card_options and "RL" in self.player_types[current_player]:
             if print_:
                 if self.shifting_phase and self.nu_shift_cards>0:
@@ -59,7 +64,7 @@ class witches(game):
             if print_:
                 if not player_has_card:
                     print("Caution player does not have card:", card, " choose one of:", self.idxList2Cards(card_options))
-                if not tmp in valid_opt_hand:
+                if not tmp in card_options:
                     print("Caution option idx", tmp, "not in (idx)", card_options)
                 if not "RL" in self.player_types[current_player]:
                     print("Caution", self.player_types[current_player], self.active_player, "is not of type RL", self.player_types)
@@ -146,8 +151,7 @@ class witches(game):
         return winning_card, on_table_win_idx, player_win_idx
 
     def getState(self):
-        ply = self.players[self.active_player]
-        play_options = self.getBinaryOptions(self.getInColor(), self.nu_players, self.nu_cards, self.shifting_phase, ply.hand, ply.offhand)# TODO self.shifting_phase
+        play_options = self.getBinaryOptions(self.active_player, self.nu_players, self.nu_cards)
         #play_options = self.convertAvailableActions(play_options)
         on_table, on_hand, played = self.getmyState(self.active_player, self.nu_players, self.nu_cards)
         add_states = [] #(nu_players-1)*5
@@ -159,10 +163,11 @@ class witches(game):
     def getValidOptions(self, player):
         # return hand index of options
         if self.shifting_phase and self.nu_shift_cards>0:
-            options = [x for x in range(len(self.players[player].hand))]
-            return options
+            options = [x for x in range(len(self.players[player].hand))] # hand index
         else:
-            return self.getOptions(self.getInColor(), self.players[player].hand, self.players[player].offhand)
+            options = self.getOptions(self.getInColor(), self.players[player].hand, self.players[player].offhand) # hand index
+        # return as cards
+        return [self.players[player].hand[i] for i in options]
 
     def convertTakeHand(self, player, take_hand):
         converted_cards = []
@@ -324,13 +329,11 @@ class witches(game):
                         negative_result+=5
         return negative_result
 
-    def getBinaryOptions(self, incolor, players, cards, shifting, handCards, offHandCards):
+    def getBinaryOptions(self, player, nu_players, nu_cards):
         #returns 0....1... x1 array BGRY 0...15 sorted
-        options_list = [0]*players*cards
-        if shifting:
-            unique_idx = self.cards2Idx(handCards)
-        else:
-            unique_idx = self.cards2Idx(self.getOptions(self.getInColor(), handCards, offHandCards))
+        options_list = [0]*nu_players*nu_cards
+        cards        = self.getValidOptions(player)
+        unique_idx   = self.cards2Idx(cards)
         for idx in unique_idx:
             options_list[idx] = 1
         return options_list
