@@ -7,6 +7,10 @@ from copy import deepcopy # used for baches and memory
 import numpy as np
 import datetime
 
+# use ray for remote / parallel playing games speed up of 40%
+import ray # pip install ray==0.8.1   this does not work: pip install ray[rllib]
+ray.init() # num_cpus=12
+
 class Batch(object):
     def __init__(self):
         self.actions = []
@@ -75,6 +79,7 @@ class Memory:
             b.append_batch(i)
         return b
 
+@ray.remote
 def playSteps(env, steps, max_corr):
     batches       = [Batch(), Batch(), Batch(), Batch()]
     result_memory = Memory()
@@ -126,32 +131,16 @@ if __name__ == '__main__':
 
     print("Model state  dimension:", state_dim, "\nModel action dimension:", action_dim)
 
-    env.printON = True
-
     max_corr_moves  = int(env.action_space.n/4+env.options_test["nu_shift_cards"])
 
-    # max_correct moves is necessary here to generate finished games!
-    # otherwise batch size might vary more
+    episodes   = 100000
+    nu_remote  = 10
+    steps      = int(episodes/nu_remote)
+    memory     = Memory()
 
-    print("Number of steps in one game:", max_corr_moves, "\n")
-    # functions breaks if done(=invalid move or game finished)
-    memory = playSteps(env, 10, max_corr_moves)
-    batch  = memory.batches[0]
-
-    print("\n")
-    print("Actions:", batch.actions)
-    print("State  :", batch.states)
-    print("Rewards:", batch.rewards)
-    print("LogProb:", batch.logprobs)
-    print("Done   :", batch.is_terminals)
-
-    # print("[Len of batch]__Reward_IsTerminal")
-    # print(batch)
-
-
-    nu_steps    = 100000
-    print("\nBenchmark playing "+str(nu_steps)+" games")
-    env.printON = False
+    print("\nBenchmark playing "+str(steps)+" games")
     start_time  = datetime.datetime.now()
-    memory      = playSteps(env, nu_steps, max_corr_moves)
-    print("Took:", datetime.datetime.now()-start_time, "Number of batches: ", len(memory.batches))
+    mem_list = ray.get([playSteps.remote(env, steps, max_corr_moves) for i in range(nu_remote)])
+    for i in mem_list:
+        memory.append_memo(i)
+    print("Took:", datetime.datetime.now()-start_time, "Number of batches: ", len(memory.batches)) # 20 sec

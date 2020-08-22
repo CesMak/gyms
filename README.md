@@ -1,11 +1,16 @@
+This repro contains a gym environment for the card game witches by amigo.
+In order to test the gym as well as training a Neuronal Network using Proximal Policy Optimization check the **Tutorials**.
+You can play and test your trained bot (ai) at **https://idgaming.de/**.
+
 ## Installation Linux (Ubuntu)
-```
+```bash
 git clone git@github.com:CesMak/gyms.git
 sudo apt install python-pip
 sudo apt install python3-venv
 python3 -m venv gym_env
 source gym_env/bin/activate
-optional: alias ss_gym='cd ~/witches; source ../gym_env/bin/activate'
+#optional: alias ss_gym='cd ~/witches; source ../gym_env/bin/activate'
+pip3 install -r requirements.txt # the requirements.txt file is in the Tutorials folder
 ```
 
 ## Install gym environment
@@ -19,6 +24,13 @@ pip install -e .
 |-|---------|-|
 |2020.08.14| |initial_commit  |
 |2020.08.22| included witches class that inherits from game class |changed_to_inherit  |
+|2020.08.22| added color free tests | added_color_free_test  |
+|2020.08.22| added ray batch generation | added_tut_03  |
+
+TODO
+- check that count Result works correctly
+- test learning in tutorial_04
+
 
 ## Further Notes
 ```
@@ -105,7 +117,29 @@ Took: 0:00:30.598447 Number of batches:  99586
 ```
 
 ### 03_Parallel_Batch_Generation
-uses ray
+* uses ray for parallel batch generation
+* pip install ray==0.8.1
+* python3 gen_batches_parallel.py
+* is 33% faster
+
+```
+2020-08-22 19:10:56,149	WARNING worker.py:682 -- WARNING: Not updating worker name since `setproctitle` is not installed. Install this with `pip install setproctitle` (or ray[debug]) to enable monitoring of worker processes.
+2020-08-22 19:10:56,156	INFO resource_spec.py:212 -- Starting Ray with 7.08 GiB memory available for workers and up to 3.54 GiB for objects. You can adjust these settings with ray.init(memory=<bytes>, object_store_memory=<bytes>).
+2020-08-22 19:10:56,397	WARNING services.py:1080 -- Failed to start the dashboard. The dashboard requires Python 3 as well as 'pip install aiohttp psutil setproctitle grpcio'.
+Creating model: Witches_multi-v2
+Model state  dimension: 255
+Model action dimension: 60
+
+Benchmark playing 10000 games
+Took: 0:00:19.996094 Number of batches:  99420
+```
+
+### 04_Include_Policy_PPO
+* include classes Actor Critic PPO
+
+
+### 05_Include Monte Carlo Tree search random sampling
+
 
 TODO
 fuege schafkopf hinzu bzw ueberlege welche aenderungen noetig waeren...
