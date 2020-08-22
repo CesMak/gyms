@@ -26,12 +26,11 @@ class card(object):
     def __repr__(self):
         return self.show()
     def show(self):
+        tmp = self.value
         for val, replace in self.value_conversion.items():
             if self.value == val:
-                val = replace
-            else:
-                val = self.value
-        return str("{} of {}_{}".format(val, self.color, self.idx, self.player[0:5]))
+                tmp = replace
+        return str("{} of {}_{}".format(tmp, self.color, self.idx))
 
 class deck(object):
     def __init__(self, nu_cards, colors=['B', 'G', 'R', 'Y'], value_conversion={}, seed=None):
@@ -208,14 +207,36 @@ class game(metaclass=abc.ABCMeta):
             result.append(self.idx2Card(j))
         return result
 
-    def printCurrentState(self):
-        #Note: ontable, onhand played play_options laenge = players* cards
+    def splitState(self):
         state = self.getState().flatten().astype(np.int)
         ll    = self.nu_players * self.nu_cards
         on_table, on_hand, played, play_options, add_states = state[0:ll], state[ll:2*ll], state[ll*2:3*ll], state[3*ll:4*ll], state[4*ll:len(state)]
+        return on_table, on_hand, played, play_options, add_states
+
+    def printCurrentState(self):
+        #Note: ontable, onhand played play_options laenge = players* cards
+        on_table, on_hand, played, play_options, add_states = self.splitState()
         for i,j in zip([on_table, on_hand, played, play_options], ["on_table", "on_hand", "played", "options"]):
              #print(j, i, self.state2Cards(i))
              print("\t", j, self.state2Cards(i))
+
+        enemy_idx  = [*range(4)]
+        enemy_idx.remove(int(self.active_player))
+        would_win  = {}
+        color_free = {}
+        for m in range(self.nu_players-1):
+            for j in range(5):
+                if j==0 and add_states[m*5+j]==1:
+                    enemy_player = enemy_idx[m]
+                    would_win["current_winner"] = self.players[enemy_player].name
+                if j>0 and add_states[m*5+j]==1:
+                    enemy_player = enemy_idx[m]
+                    tmp = ""
+                    for u,z in enumerate(["B", "G", "R", "Y"]):
+                        if (j-1)==u:
+                            tmp = z
+                    color_free[self.players[enemy_player].name+"_"+tmp] = "free"
+        print("\t", "add_states:", would_win, color_free, add_states)
 
     def nextGamePlayer(self):
         if self.game_start_player < self.nu_players-1:
@@ -230,6 +251,14 @@ class game(metaclass=abc.ABCMeta):
         else:
             prev_player = input_number -1
         return prev_player
+
+    def getNextPlayerIdx(self, input_number):
+        next_player = input_number
+        if input_number < self.nu_players-1:
+            next_player +=1
+        else:
+            next_player = 0
+        return next_player
 
     def getNextPlayer(self):
         # manipulates active player
@@ -287,7 +316,6 @@ class game(metaclass=abc.ABCMeta):
             print(self.player_names[i]+" ["+self.player_types[i]+"] ", self.players[i].hand)
 
     def hasSpecificCard(self, cardValue, cardColor, cards):
-        # return True if the offhand has this card!
         for stich in cards:
             for card in stich:
                 if card is not None:

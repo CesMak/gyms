@@ -3,16 +3,20 @@ from witches import witches
 import numpy as np
 
 class gameLogic(unittest.TestCase):
+    def setUp(self):
+        print ("\n\nIn method", self._testMethodName,"\n")
 
     def initGame(self, seed=None):
-        test_game     = witches({"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": seed, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {15: "J", 11: "°11°"}})
+        test_game     = witches({"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": seed, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {11: "^11", 15: "J"}})
         test_game.reset()
 
-        print(test_game.getState().flatten().astype(np.int).shape)
+        #print(test_game.getState().flatten().astype(np.int).shape)
 
         test_game.printHands()
+        print("\n")
         return test_game
 
+    #@unittest.skip
     def test_randomPlay(self):
         test_game = self.initGame(seed=22)
 
@@ -26,6 +30,7 @@ class gameLogic(unittest.TestCase):
             for j in i:
                 rewards, corr_move, done = test_game.play_ai_move(j, print_=True)
 
+    #@unittest.skip
     def test_getBinaryOptions(self):
         test_game = self.initGame(seed=22)
 
@@ -33,7 +38,72 @@ class gameLogic(unittest.TestCase):
         for i in [1, 3, 9, 0, 5, 12, 10, 2]:
             rewards, corr_move, done = test_game.play_ai_move(i, print_=False)
 
-        print("TODO test vector here if correct! BGRY and 0....15 or is it sorted by index?!")
+        tricks = [[47, 49, 48]]
+        for i in tricks:
+            for j in i:
+                rewards, corr_move, done = test_game.play_ai_move(j, print_=True)
+
+        play_options = test_game.getBinaryOptions(test_game.active_player, test_game.nu_players, test_game.nu_cards)
+        assert len(play_options) == 60
+        assert len(test_game.state2Cards(play_options)) == 5
+
+        print("Play options:", play_options)
+        print(len(play_options))
+        print(test_game.state2Cards(play_options))
+
+    #@unittest.skip
+    def test_getState(self):
+        test_game = self.initGame(seed=22)
+
+        #shift cards:
+        for i in [1, 3, 9, 0, 5, 12, 10, 2]:
+            rewards, corr_move, done = test_game.play_ai_move(i, print_=False)
+
+        print("Hand after shifting:")
+        test_game.printHands()
+        print("\n")
+
+        tricks = [[47, 49, 48]]
+        for i in tricks:
+            for j in i:
+                rewards, corr_move, done = test_game.play_ai_move(j, print_=True)
+
+        #play_options = test_game.getBinaryOptions(test_game.active_player, test_game.nu_players, test_game.nu_cards)
+        print(test_game.player_names[test_game.active_player]+" state is:")
+        test_game.printCurrentState()
+
+        res_vector = test_game.getState()
+        assert len(res_vector[0]) == 255
+
+    def test_colorFree(self):
+        # wichtig color free darf erst auffallen nachdem ein spieler nicht mehr die farbe bekannt hat
+        test_game = self.initGame(seed=22)
+
+        #shift cards:
+        for i in [1, 3, 9, 0, 5, 12, 10, 2]:
+            rewards, corr_move, done = test_game.play_ai_move(i, print_=False)
+
+        print("Hand after shifting:")
+        test_game.printHands()
+        print("\n")
+
+        tricks = [[47, 49, 48, 46],[53,54,57,58],[7, 1, 12, 10], [3, 9, 0, 5], [25, 15, 26, 24], [55, 50, 51, 44], [56, 32]]
+        for i in tricks:
+            for j in i:
+                rewards, corr_move, done = test_game.play_ai_move(j, print_=True)
+
+        print("\nHand after playing some rounds:")
+        test_game.printHands()
+
+        print(test_game.player_names[test_game.active_player]+" state is:")
+        test_game.printCurrentState()
+
+        on_table, on_hand, played, play_options, add_states = test_game.splitState()
+        self.assertEqual(add_states.tolist(), [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+
+
+        # res_vector = test_game.getState()
+        # assert len(res_vector[0]) == 255
 
         # print("Start playing\n")
         # for i in [1, 2]:

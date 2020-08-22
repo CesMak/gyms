@@ -165,7 +165,7 @@ class witches(game):
         if self.shifting_phase and self.nu_shift_cards>0:
             options = [x for x in range(len(self.players[player].hand))] # hand index
         else:
-            options = self.getOptions(self.getInColor(), self.players[player].hand, self.players[player].offhand) # hand index
+            options = self.getOptions(self.getInColor(), player) # hand index
         # return as cards
         return [self.players[player].hand[i] for i in options]
 
@@ -233,6 +233,7 @@ class witches(game):
             return {"state": "play", "ai_reward": trick_rewards[player_win_idx], "on_table_win_idx": on_table_win_idx, "trick_rewards": trick_rewards, "player_win_idx": player_win_idx, "final_rewards": self.rewards}, round_finished, self.isGameFinished()
 
     def getAdditionalState(self, playeridx):
+        # result = [would win, bgry color free]
         result = []
         player = self.players[playeridx]
 
@@ -260,12 +261,13 @@ class witches(game):
             played[card.idx] = 1
         return on_table, on_hand, played
 
-##### TODO - moved from player .....
-### move below into witches class!
-    def getOptions(self, incolor, cards, offhandCards, orderOptions=False):
+    def getOptions(self, incolor, player, orderOptions=False):
         # incolor = None -> Narr was played played before
         # incolor = None -> You can start!
         # Return Hand index
+
+        cards        = self.players[player].hand
+
         options = []
         hasColor = False
         if incolor is None:
@@ -285,15 +287,15 @@ class witches(game):
             options = [] # necessary otherwise joker double!
             for i, card in enumerate(cards):
                 options.append(i)
-            if not self.hasJoker(offhandCards) and incolor is not None:
-                self.setColorFree(incolor)
+            if incolor is not None: # no do not check for joker here!
+                self.players[player].setColorFree(incolor)
         if orderOptions: return sorted(options, key = lambda x: ( x[1].color,  x[1].value))
         return options
 
 
     def hasJoker(self, cards):
         for i in ["Y", "R", "G", "B"]:
-            if super().hasSpecificCard(14, i, cards):
+            if super().hasSpecificCard(15, i, cards):
                 return True
         return False
 
