@@ -1,5 +1,7 @@
 This repro contains a gym environment for the card game witches by amigo.
+
 In order to test the gym as well as training a Neuronal Network using Proximal Policy Optimization check the **Tutorials**.
+
 You can play and test your trained bot (ai) at **https://idgaming.de/**.
 
 ## Installation Linux (Ubuntu)
@@ -14,36 +16,20 @@ pip3 install -r requirements.txt # the requirements.txt file is in the Tutorials
 ```
 
 ## Install gym environment
-```
+```bash
 cd gym
 pip install -e .
 ```
 
-## Changelog
-|Date|Description|commit|
-|-|---------|-|
-|2020.08.14| |initial_commit  |
-|2020.08.22| included witches class that inherits from game class |changed_to_inherit  |
-|2020.08.22| added color free tests | added_color_free_test  |
-|2020.08.22| added ray batch generation | added_tut_03  |
-
-TODO
-- check that count Result works correctly
-- test learning in tutorial_04
-
-
-## Further Notes
-```
-pip freeze > requirements.txt
-# to export class model graph:
-#sudo apt install pylint
-pyreverse -o png gameClasses.py witches.py
-```
-
 ## Tutorials
 
-### 01_GenerateGymData
+In order to sucessfully run the tutorials make sure to install the requirements.txt file:
+```bash
+pip3 install -r requirements.txt # the requirements.txt file is in the Tutorials folder
 ```
+
+### 01_GenerateGymData
+```bash
 /01_Tutorials/01_GenerateGymData$ python test_gym.py
 ```
 
@@ -141,20 +127,31 @@ Took: 0:00:19.996094 Number of batches:  99420
 ### 05_Include Monte Carlo Tree search random sampling
 
 
-TODO
-fuege schafkopf hinzu bzw ueberlege welche aenderungen noetig waeren...
-dass man nur kleine extra klasse schafkopf braucht!
-
-- player has now a type not in the game! TODO implement this !
 
 
-Todo definiere klasse sauber
-fuege room klasse und witches klasse hinzu
-nutze auch noch allgemeine game klasse?
+## Further Notes
+```bash
+pip freeze > requirements.txt
+# to export class model graph:
+#sudo apt install pylint
+pyreverse -o png gameClasses.py witches.py
+```
 
-room klasse wohl er nicht aber viele methoden von helper klasse in gameClasses mit rein
-
-
-## Generelles Konzept gameClasses
+## General gym design
 * alles in einer Datei dass einfacher
 * Karten Anzahl und Spieleranzahl sowie unterschiedliche Spiele sollen unterstützt werden
+
+
+## Changelog
+|Date|Description|commit|
+|-|---------|-|
+|2020.08.14| |initial_commit  |
+|2020.08.22| included witches class that inherits from game class |changed_to_inherit  |
+|2020.08.22| added color free tests | added_color_free_test  |
+|2020.08.22| added ray batch generation | added_tut_03  |
+
+## TODO
+- check that count Result works correctly
+- test learning in tutorial_04
+- player has now a type not in the game! TODO implement this !
+- fuege room klasse methoden noch zu game hinzu
