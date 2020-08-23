@@ -282,9 +282,10 @@ class game(metaclass=abc.ABCMeta):
         return random.randrange(len(self.players[self.active_player].hand))
 
     def getRandomValidOption(self):
-        valid_options_idx = self.getValidOptions(self.active_player)# hand index
-        rand_idx = random.randrange(len(valid_options_idx))
-        return valid_options_idx[rand_idx]
+        # return a card!
+        valid_options_as_cards = self.getValidOptions(self.active_player)# cards
+        rand_idx               = random.randrange(len(valid_options_as_cards))
+        return valid_options_as_cards[rand_idx]
 
     def getRandomOption_(self):
         incolor = None
@@ -300,7 +301,7 @@ class game(metaclass=abc.ABCMeta):
     def assignRewards(self):
         for i, player in enumerate(self.players):
             #print(i, player.offhand)
-            self.rewards[i] = player.countResult(player.offhand)
+            self.rewards[i] = self.countResult([self.on_table_cards], player.offhand) #player.countResult(player.offhand)
 
     def isGameFinished(self):
         cards = 0

@@ -2,12 +2,16 @@ import unittest
 from witches import witches
 import numpy as np
 
+opts_rl   = {"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": None, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {11: "^11", 15: "J"}}
+opts_rand = {"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RANDOM", "RL", "RANDOM", "RANDOM"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": None, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {11: "^11", 15: "J"}}
+
 class gameLogic(unittest.TestCase):
     def setUp(self):
         print ("\n\nIn method", self._testMethodName,"\n")
 
-    def initGame(self, seed=None):
-        test_game     = witches({"names": ["Max", "Lea", "Jo", "Tim"], "type": ["RL", "RL", "RL", "RL"], "nu_shift_cards": 2, "nu_cards": 15, "active_player": 3, "seed": seed, "colors": ['B', 'G', 'R', 'Y'], "value_conversion": {11: "^11", 15: "J"}})
+    def initGame(self, opts, seed=None):
+        opts["seed"] = seed
+        test_game     = witches(opts)
         test_game.reset()
 
         #print(test_game.getState().flatten().astype(np.int).shape)
@@ -18,7 +22,7 @@ class gameLogic(unittest.TestCase):
 
     #@unittest.skip
     def test_randomPlay(self):
-        test_game = self.initGame(seed=22)
+        test_game = self.initGame(opts_rl, seed=22)
 
         #shift cards:
         for i in [1, 3, 9, 0, 5, 12, 10, 2]:
@@ -32,7 +36,7 @@ class gameLogic(unittest.TestCase):
 
     #@unittest.skip
     def test_getBinaryOptions(self):
-        test_game = self.initGame(seed=22)
+        test_game = self.initGame(opts_rl, seed=22)
 
         #shift cards:
         for i in [1, 3, 9, 0, 5, 12, 10, 2]:
@@ -53,7 +57,7 @@ class gameLogic(unittest.TestCase):
 
     #@unittest.skip
     def test_getState(self):
-        test_game = self.initGame(seed=22)
+        test_game = self.initGame(opts_rl, seed=22)
 
         #shift cards:
         for i in [1, 3, 9, 0, 5, 12, 10, 2]:
@@ -75,9 +79,10 @@ class gameLogic(unittest.TestCase):
         res_vector = test_game.getState()
         assert len(res_vector[0]) == 255
 
+    #@unittest.skip
     def test_colorFree(self):
         # wichtig color free darf erst auffallen nachdem ein spieler nicht mehr die farbe bekannt hat
-        test_game = self.initGame(seed=22)
+        test_game = self.initGame(opts_rl, seed=22)
 
         #shift cards:
         for i in [1, 3, 9, 0, 5, 12, 10, 2]:
@@ -100,6 +105,42 @@ class gameLogic(unittest.TestCase):
 
         on_table, on_hand, played, play_options, add_states = test_game.splitState()
         self.assertEqual(add_states.tolist(), [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+
+    def test_randomPlaying(self):
+        test_game = self.initGame(opts_rand, seed=22)
+
+        #shift cards:
+        for ai_action in [3, 12]:
+            rewards, _, _ = test_game.playUntilAI(print_=True)
+            rewards, corr_moves, done = test_game.stepRandomPlay(ai_action, print_=True)
+
+        #play cards:
+        for ai_action in [8, 16, 20]:
+            rewards, _, _ = test_game.playUntilAI(print_=True)
+            rewards, corr_moves, done = test_game.stepRandomPlay(ai_action, print_=True)
+
+        assert test_game.active_player == 1
+
+    def test_countResult(self):
+        print("TODO play specific cards! and test counting result etc.")
+
+        # print("Hand after shifting:")
+        # test_game.printHands()
+        # print("\n")
+        #
+        # tricks = [[47, 49, 48, 46],[53,54,57,58],[7, 1, 12, 10], [3, 9, 0, 5], [25, 15, 26, 24], [55, 50, 51, 44], [56, 32]]
+        # for i in tricks:
+        #     for j in i:
+        #         rewards, corr_move, done = test_game.play_ai_move(j, print_=True)
+        #
+        # print("\nHand after playing some rounds:")
+        # test_game.printHands()
+        #
+        # print(test_game.player_names[test_game.active_player]+" state is:")
+        # test_game.printCurrentState()
+        #
+        # on_table, on_hand, played, play_options, add_states = test_game.splitState()
+        # self.assertEqual(add_states.tolist(), [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1])
 
 
         # res_vector = test_game.getState()

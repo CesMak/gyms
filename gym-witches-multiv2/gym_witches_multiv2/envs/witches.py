@@ -79,12 +79,12 @@ class witches(game):
             if "RANDOM" in self.player_types[current_player]:
                 if  self.shifting_phase and self.nu_shift_cards>0:
                     hand_idx_action = self.getRandomCard()
-                    card            =        self.players[current_player].hand[hand_idx_action]
+                    card            = self.players[current_player].hand[hand_idx_action]
                     if print_:
                         print("[{}] {} {}\t shifts {}\tCard {}\tHand Index {}\t len {}".format(self.current_round, current_player, self.player_names[current_player], self.player_types[current_player], card, hand_idx_action, len(self.players[current_player].hand)))
                 else:
-                    hand_idx_action = self.getRandomValidOption()
-                    card            = self.players[self.active_player].hand[hand_idx_action]
+                    card            = self.getRandomValidOption()
+                    hand_idx_action = self.players[self.active_player].hand.index(card)
                     if print_:
                         print("[{}] {} {}\t plays {}\tCard {}\tHand Index {}\t len {}".format(self.current_round, current_player, self.player_names[current_player], self.player_types[current_player], card, hand_idx_action, len(self.players[current_player].hand)))
                 rewards, round_finished, gameOver = self.step(hand_idx_action, print_)
@@ -161,7 +161,7 @@ class witches(game):
         return np.asarray([on_table+ on_hand+ played+ play_options+ add_states])
 
     def getValidOptions(self, player):
-        # return hand index of options
+        # returns card of valid options
         if self.shifting_phase and self.nu_shift_cards>0:
             options = [x for x in range(len(self.players[player].hand))] # hand index
         else:
